@@ -16,6 +16,12 @@ class Application(tk.Tk):
         self.app_container.grid_rowconfigure(0, weight=1)
         self.app_container.grid_columnconfigure(0, weight=1)
 
+        #################### MAIN VARIABLES ##########################
+        self.transaction_header = []
+        self.all_transactions = []
+        ##############################################################
+
+        ################ MENU BAR ####################################
         self.menubar = tk.Menu(self.app_container)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
         self.filemenu.add_command(label="Import Data", command=lambda:self.ImportData())
@@ -23,6 +29,7 @@ class Application(tk.Tk):
         self.filemenu.add_command(label="Exit", command=quit)
         self.menubar.add_cascade(label="File", menu=self.filemenu)
         tk.Tk.config(self, menu=self.menubar)
+        ##############################################################
 
         self.app_frames = {}
         for F in (Sessionpage, Homepage):
