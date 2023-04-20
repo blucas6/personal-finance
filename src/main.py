@@ -1,11 +1,15 @@
+'''
+MAIN script: Starting point for running the software
+'''
 import os
 
-from application import Application
+from controller import Controller
 from config import *
 
 
-
 def Clean():
+    if not os.path.exists(CUSTOM_DATA_DIR):
+        os.makedirs(CUSTOM_DATA_DIR)
     if not os.path.exists(STATEMENT_DIR):
         os.makedirs(STATEMENT_DIR)
 
@@ -13,8 +17,7 @@ def Clean():
 ##############################################################
 ############## RUN SEQUENCE ##################################
 Clean()
-app = Application()
-app.geometry("%sx%s"%(WIN_WIDTH, WIN_HEIGHT))
-app.mainloop()
+app = Controller()
+app.root.mainloop()
 
 ##############################################################
