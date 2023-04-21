@@ -19,5 +19,5 @@ def Clean():
 Clean()
 app = Controller()
 app.root.mainloop()
-
+app.root.destroy()
 ##############################################################

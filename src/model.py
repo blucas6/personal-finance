@@ -5,6 +5,8 @@ from os import listdir
 from os.path import isfile, join
 from application import Application
 import csv
+import pandas as pd
+from datetime import datetime
 
 class Model:
     def __init__(self, controller):
@@ -15,8 +17,14 @@ class Model:
         return files
     
     def ReadData(self):
+        list_of_dfs = []
         files = self.FindStatements()
+        merged_dfs = pd.DataFrame()
         if files:
+            for f in files:
+                list_of_dfs.append(pd.read_csv(CUSTOM_DATA_DIR+"/"+f))
+            merged_dfs = pd.concat(list_of_dfs, ignore_index=True)
+            # DELETE LATER #
             for f in files:
                 with open(CUSTOM_DATA_DIR+"/"+f, newline='') as csvfile:
                     datareader = csv.reader(csvfile, delimiter=',')
@@ -25,6 +33,8 @@ class Model:
                             self.c.transaction_header = row
                         else:
                             self.c.all_transactions.append(row)
+            ###########################
+        return merged_dfs
 
     def isFileExtCSV(self, f):
         for c in range(len(f)):
