@@ -8,13 +8,17 @@ from table import DataTable, PieChart, BarChart
 import matplotlib.pyplot as plt
 from datetime import datetime
 import pandas as pd
-
+from PIL import ImageTk, Image
 
 from config import *
 
 class Application:
     def __init__(self, root, controller):
         self.c = controller
+
+        ################ ICONS ######################################
+        self.AddFileIcon = ImageTk.PhotoImage(Image.open("../icons/open_file.png"))
+        #############################################################
 
         ################ MENU BAR ####################################
         self.menubar = tk.Menu(root)
@@ -29,6 +33,8 @@ class Application:
         ############## TOOL BAR ######################################
         self.ToolBarArea = tk.Frame(root)
         self.ToolBarArea.grid(row=0, column=0, columnspan=3)
+        self.AddFileButton = tk.Button(self.ToolBarArea, image=self.AddFileIcon)
+        self.AddFileButton.grid(row=0, column=0)
         ##############################################################
 
         ############### VIEW FILES COLUMN ############################
