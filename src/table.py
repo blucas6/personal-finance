@@ -101,6 +101,9 @@ class DataTable:
     def getHeaderSize(self, index):
         length = 0
         for r in self.data:
-            if len(r[index]) > length:
-                length = len(r[index])
+            try:
+                if len(r[index]) > length:
+                    length = len(r[index])
+            except TypeError:
+                length = 10
         return length

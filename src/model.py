@@ -12,9 +12,18 @@ class Model:
     def __init__(self, controller):
         self.c = controller
 
+    def FindStartMonth(self):
+        earliest = self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX].min()
+        self.c.CurrentViewingMonth.set(pd.to_datetime(earliest).strftime("%B %Y"))
+
     def FindStatements(self):
         files = [f for f in listdir(CUSTOM_DATA_DIR) if isfile(join(CUSTOM_DATA_DIR, f))]
         return files
+    
+    def CleanDates(self, df):
+        df[TRANSACTIONDATE_INDEX] = pd.to_datetime(df[TRANSACTIONDATE_INDEX])
+        df[DATEPOSTED_INDEX] = pd.to_datetime(df[DATEPOSTED_INDEX])
+        return df
     
     def ReadData(self):
         list_of_dfs = []
@@ -24,6 +33,8 @@ class Model:
             for f in files:
                 list_of_dfs.append(pd.read_csv(CUSTOM_DATA_DIR+"/"+f))
             merged_dfs = pd.concat(list_of_dfs, ignore_index=True)
+            # merged_dfs = self.CleanDates(merged_dfs)
+            merged_dfs = merged_dfs.iloc[::-1].reset_index(drop=True)
             # DELETE LATER #
             for f in files:
                 with open(CUSTOM_DATA_DIR+"/"+f, newline='') as csvfile:
@@ -43,21 +54,22 @@ class Model:
                     return True
         return False
     
-    def CalculatePercentages(self):
-        if self.c.all_transactions:
-            sort = {}
-            CurrentData = {}
-            for t in self.c.all_transactions:
-                if t[PRICE_INDEX]:
-                    if not t[CATEGORY_INDEX] in CurrentData:
-                        sort[t[CATEGORY_INDEX]] = float(t[PRICE_INDEX])
-                    else:
-                        sort[t[CATEGORY_INDEX]] += float(t[PRICE_INDEX])
-            sort = dict(sorted(sort.items(), key=lambda item: item[1]))
-            keys = list(sort.keys())
-            for i,k in enumerate(keys):
-                if not k in CurrentData:
-                    CurrentData[k] = sort[k]
-                    opposite_key = keys[len(keys)-1-i]
-                    CurrentData[opposite_key] = sort[opposite_key]
+    def getPercentages(self, transactions):
+        groups = transactions.groupby(CATEGORY_INDEX)
+        CurrentData = {}
+        for name, group in groups:
+            sum = group[PAYMENT_INDEX].sum()
+            CurrentData[name] = sum
         return CurrentData
+    
+    def getTransactionsWithinRange(self):
+        dt = datetime.strptime(self.c.CurrentViewingMonth.get(), '%B %Y')
+        monthrange = ((pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.month == dt.month) & (pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.year == dt.year))
+        return self.c.TotalTransactionsDF[monthrange]
+    
+    def getAvailableMonths(self):
+        months = []
+        groups = self.c.TotalTransactionsDF.groupby([pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.month, pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.year])
+        for name, group in groups:
+            months.append(datetime.strptime(str(name), "(%m, %Y)").strftime("%B %Y"))
+        return months

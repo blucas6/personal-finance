@@ -15,5 +15,7 @@ CUSTOM_DATA_DIR = "../data"
 
 
 # DATA TABLE
-CATEGORY_INDEX = 4      # column that category is stored in
-PRICE_INDEX = 5         # column that price is stored in
+CATEGORY_INDEX = 'Category'      # column that category is stored in
+PAYMENT_INDEX = 'Debit'         # column that price is stored in
+TRANSACTIONDATE_INDEX = 'Transaction Date'
+DATEPOSTED_INDEX = 'Posted Date'

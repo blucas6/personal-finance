@@ -8,6 +8,7 @@ from application import Application
 import csv
 from model import Model
 import pandas as pd
+from datetime import datetime
 
 class Controller:
     def __init__(self):
@@ -21,6 +22,9 @@ class Controller:
         self.all_transactions = []      # original array of transaction from bank
         self.TotalTransactionsDF = pd.DataFrame()
         ##############################################################
+        ################### VIEWING VARIABLES ########################
+        self.CurrentViewingMonth = tk.StringVar(value="")
+        ##############################################################
         #################### MAIN VARIABLES ##########################
         self.MODEL = Model(self)
         self.VIEW = Application(self.root, self)
@@ -30,7 +34,8 @@ class Controller:
 
     def StartUp(self):
         self.LoadInDataTransactions()
-        print(self.TotalTransactionsDF)
+        # print(self.TotalTransactionsDF)
+        self.MODEL.FindStartMonth()
         self.VIEW.setup()
 
     def genListBox(self):
@@ -47,13 +52,22 @@ class Controller:
     
     def LoadInDataTransactions(self):
         self.TotalTransactionsDF = self.MODEL.ReadData()
-        self.VIEW.RefreshTable()
 
-    def getPercentages(self):
-        return self.MODEL.CalculatePercentages()
+    def getPercentages(self, transactions):
+        return self.MODEL.getPercentages(transactions)
     
     def on_closing(self):
         self.root.quit()
         # if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
         #     self.VIEW.closeChart()
         #     self.root.quit()
+
+    def getTransactionsWithinRange(self):
+        return self.MODEL.getTransactionsWithinRange()
+    
+    def FindAvailableMonths(self):
+        return self.MODEL.getAvailableMonths()
+    
+    def ChangeView(self, date):
+        self.CurrentViewingMonth.set(date)
+        self.VIEW.RefreshGraphics()
