@@ -12,7 +12,7 @@ import math
 from config import *
 
 class BarChart:
-    def __init__(self, root, labels, data, row, col, xaxis, yaxis, title=""):
+    def __init__(self, root, labels, data, row, col, xaxis, yaxis, colors="", columnspan=0, title=""):
         self.title = title
         self.labels = labels
         self.data = data
@@ -20,14 +20,21 @@ class BarChart:
         self.canvas = FigureCanvasTkAgg(self.fig, master=root)
         self.xaxis_title = xaxis
         self.yaxis_title = yaxis
+        self.colors = colors
         self.drawChart()
-        self.canvas.get_tk_widget().grid(row=row, column=col)
+        if columnspan > 0:
+            self.canvas.get_tk_widget().grid(row=row, column=col, columnspan=columnspan)
+        else:
+            self.canvas.get_tk_widget().grid(row=row, column=col)
         plt.xticks(rotation=45)
         plt.tight_layout()
 
     def drawChart(self):
         # self.ax.clear()
-        self.ax.bar(self.labels, self.data)
+        if self.colors:
+            self.ax.bar(self.labels, self.data, color=self.colors)
+        else:
+            self.ax.bar(self.labels, self.data)
         self.ax.set_xlabel(self.xaxis_title)
         self.ax.set_ylabel(self.yaxis_title)
         self.ax.set_title(self.title)

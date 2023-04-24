@@ -70,4 +70,7 @@ class Controller:
     
     def ChangeView(self, date):
         self.CurrentViewingMonth.set(date)
-        self.VIEW.RefreshGraphics()
+        self.VIEW.RefreshMonthlyGraphs()
+
+    def FindTotalSpending(self):
+        return self.MODEL.getTotalSpending()

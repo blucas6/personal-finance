@@ -48,12 +48,17 @@ class Application:
         self.MonthlyDropDown.set('Select a Month')
         self.MonthlyDropDown.grid(row=0, column=0, sticky='w')
         self.MonthlyDropDown.bind("<<ComboboxSelected>>", self.DropDownEvent)
-        self.CurrentMonthTitle_label = tk.Label(self.MainArea, textvariable=self.c.CurrentViewingMonth, font=MEDIUM_FONT)
+        self.CurrentMonthTitle_label = tk.Label(self.MainArea, textvariable=self.c.CurrentViewingMonth, font=LARGE_FONT)
         self.CurrentMonthTitle_label.grid(row=0, column=1, columnspan=3)
 
         self.transactionFrame = tk.LabelFrame(self.MainArea, text="Your Transactions", bd=10, bg="lightblue", width=10)
         self.transactionFrame.grid(row=2, column=0, columnspan=4)
         self.transaction_table = ""
+
+        self.TotalSpendingGraphTitle = tk.StringVar(value="Total Spending")
+        self.TotalSpendingGraph_Label = tk.Label(self.MainArea, textvariable=self.TotalSpendingGraphTitle, font=MEDIUM_FONT)
+        self.TotalSpendingGraph_Label.grid(row=3, column=0, columnspan=4)
+        self.TotalSpendingGraph = ""
 
         #####################################################################
 
@@ -77,20 +82,30 @@ class Application:
     
     def setup(self):
         self.c.genListBox()
-        self.RefreshGraphics()
+        self.RefreshMonthlyGraphs()
         self.RefreshMonthDropdown()
+        self.RefreshTotalSpending()
 
-    def RefreshGraphics(self):
+    def RefreshMonthlyGraphs(self):
         transactions = self.c.getTransactionsWithinRange()
         self.transaction_table = DataTable(self.transactionFrame, list(transactions.columns), transactions.values.tolist(), 1, 0)
-
-        self.CurrentData = self.c.getPercentages(transactions)
-        self.Graph = PieChart(self.RightSideArea, list(self.CurrentData.keys()), list(self.CurrentData.values()), 1, 0)
-        self.GraphBar = BarChart(self.RightSideArea, list(self.CurrentData.keys()), list(self.CurrentData.values()), 2, 0, "Categories", "Amount Spent ($)")
+        CurrentData = self.c.getPercentages(transactions)
+        self.Graph = PieChart(self.RightSideArea, list(CurrentData.keys()), list(CurrentData.values()), 1, 0)
+        self.GraphBar = BarChart(self.RightSideArea, list(CurrentData.keys()), list(CurrentData.values()), 2, 0, "Categories", "Amount Spent ($)")
         total_spending = 0
-        for key in self.CurrentData:
-            total_spending += self.CurrentData[key]
+        for key in CurrentData:
+            total_spending += CurrentData[key]
         self.MonthlySpending_var.set("Total Spent: %s" % round(total_spending, 2))
+
+    def RefreshTotalSpending(self):
+        CurrentData = self.c.FindTotalSpending()
+        colors = []
+        for key in CurrentData.keys():
+            if self.c.CurrentViewingMonth.get() == key:
+                colors.append('#2ca02c')
+            else:
+                colors.append('#1f77b4')
+        self.TotalSpendingGraph = BarChart(self.MainArea, list(CurrentData.keys()), list(CurrentData.values()), 4, 0, "Months", "Amount Spend($)", colors, columnspan=4)
 
     def RefreshMonthDropdown(self):
         combo = self.c.FindAvailableMonths()
@@ -102,3 +117,4 @@ class Application:
 
     def DropDownEvent(self, e):
         self.c.ChangeView(self.MonthlyDropDown.get())
+        self.RefreshTotalSpending()

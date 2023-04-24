@@ -67,9 +67,19 @@ class Model:
         monthrange = ((pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.month == dt.month) & (pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.year == dt.year))
         return self.c.TotalTransactionsDF[monthrange]
     
+    def getMonthGroups(self):
+        return self.c.TotalTransactionsDF.groupby([pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.month, pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.year])
+
     def getAvailableMonths(self):
         months = []
-        groups = self.c.TotalTransactionsDF.groupby([pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.month, pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.year])
+        groups = self.getMonthGroups()
         for name, group in groups:
             months.append(datetime.strptime(str(name), "(%m, %Y)").strftime("%B %Y"))
         return months
+    
+    def getTotalSpending(self):
+        monthlyspending = {}
+        groups = self.getMonthGroups()
+        for name, group in groups:
+            monthlyspending[datetime.strptime(str(name), "(%m, %Y)").strftime("%B %Y")] = group[PAYMENT_INDEX].sum()
+        return monthlyspending

@@ -5,7 +5,7 @@ SMALL_FONT = ("Verdana", 10)
 
 
 # WINDOW
-WIN_WIDTH = 1600
+WIN_WIDTH = 1650
 WIN_HEIGHT = 900
 
 
