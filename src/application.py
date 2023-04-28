@@ -17,7 +17,7 @@ class Application:
         self.c = controller
 
         ################ ICONS ######################################
-        self.AddFileIcon = ImageTk.PhotoImage(Image.open("../icons/open_file.png"))
+        self.AddFileIcon = ImageTk.PhotoImage(Image.open("../icons/open_file.png").resize((23,23)))
         #############################################################
 
         ################ MENU BAR ####################################
@@ -32,8 +32,8 @@ class Application:
 
         ############## TOOL BAR ######################################
         self.ToolBarArea = tk.Frame(root)
-        self.ToolBarArea.grid(row=0, column=0, columnspan=3)
-        self.AddFileButton = tk.Button(self.ToolBarArea, image=self.AddFileIcon)
+        self.ToolBarArea.grid(row=0, column=0, columnspan=3, sticky='w')
+        self.AddFileButton = tk.Button(self.ToolBarArea, image=self.AddFileIcon, command=lambda:self.c.ImportData())
         self.AddFileButton.grid(row=0, column=0)
         ##############################################################
 
@@ -59,12 +59,13 @@ class Application:
 
         self.transactionFrame = tk.LabelFrame(self.MainArea, text="Your Transactions", bd=10, bg="lightblue", width=10)
         self.transactionFrame.grid(row=2, column=0, columnspan=4)
-        self.transaction_table = ""
+        self.transaction_table = DataTable(self.transactionFrame, [], [], 1, 0)
 
         self.TotalSpendingGraphTitle = tk.StringVar(value="Total Spending")
         self.TotalSpendingGraph_Label = tk.Label(self.MainArea, textvariable=self.TotalSpendingGraphTitle, font=MEDIUM_FONT)
         self.TotalSpendingGraph_Label.grid(row=3, column=0, columnspan=4)
-        self.TotalSpendingGraph = ""
+        self.TotalSpendingGraph = BarChart(self.MainArea, [], [], 4, 0, "Months", "Amount Spend($)", [6, 2], columnspan=4)
+
 
         #####################################################################
 
@@ -77,12 +78,13 @@ class Application:
         
         self.GraphTitle = tk.Label(self.RightSideArea, textvariable=self.Graph_Title_var, font=MEDIUM_FONT)
         self.GraphTitle.grid(row=0, column=0)
-        self.Graph = ""
+        self.Graph = PieChart(self.RightSideArea, [], [], 1, 0)
 
-        self.GraphBar = ""
-
+        self.GraphBar = BarChart(self.RightSideArea, [], [], 2, 0, "Categories", "Amount Spent ($)", [5, 2.5])
         self.MonthlySpendingLabel = tk.Label(self.RightSideArea, textvariable=self.MonthlySpending_var, font=SMALL_FONT)
         self.MonthlySpendingLabel.grid(row=3, column=0)
+
+
         
         #####################################################################
     
@@ -94,10 +96,10 @@ class Application:
 
     def RefreshMonthlyGraphs(self):
         transactions = self.c.getTransactionsWithinRange()
-        self.transaction_table = DataTable(self.transactionFrame, list(transactions.columns), transactions.values.tolist(), 1, 0)
+        self.transaction_table.drawTree(list(transactions.columns), transactions.values.tolist())
         CurrentData = self.c.getPercentages(transactions)
-        self.Graph = PieChart(self.RightSideArea, list(CurrentData.keys()), list(CurrentData.values()), 1, 0)
-        self.GraphBar = BarChart(self.RightSideArea, list(CurrentData.keys()), list(CurrentData.values()), 2, 0, "Categories", "Amount Spent ($)")
+        self.Graph.drawChart(list(CurrentData.keys()), list(CurrentData.values()))
+        self.GraphBar.drawChart(list(CurrentData.keys()), list(CurrentData.values()))
         total_spending = 0
         for key in CurrentData:
             total_spending += CurrentData[key]
@@ -105,21 +107,27 @@ class Application:
 
     def RefreshTotalSpending(self):
         CurrentData = self.c.FindTotalSpending()
+        currentmonth = datetime.strptime(self.c.CurrentViewingMonth.get(), '%B %Y').strftime('%B %y')
         colors = []
         for key in CurrentData.keys():
-            if self.c.CurrentViewingMonth.get() == key:
+            if currentmonth == key:
                 colors.append('#2ca02c')
             else:
                 colors.append('#1f77b4')
-        self.TotalSpendingGraph = BarChart(self.MainArea, list(CurrentData.keys()), list(CurrentData.values()), 4, 0, "Months", "Amount Spend($)", colors, columnspan=4)
+        self.TotalSpendingGraph.drawChart(list(CurrentData.keys()), list(CurrentData.values()), colors=colors)
 
     def RefreshMonthDropdown(self):
         combo = self.c.FindAvailableMonths()
         self.MonthlyDropDown['values'] = combo
         self.MonthlyDropDown.current(0)
 
-    def closeChart(self):
-        plt.close()
+    def closeCharts(self):
+        if not self.TotalSpendingGraph == "":
+            self.TotalSpendingGraph.widget.destroy()
+        if not self.Graph == "":
+            self.Graph.widget.destroy()
+        if not self.GraphBar == "":
+            self.GraphBar.widget.destroy()
 
     def DropDownEvent(self, e):
         self.c.ChangeView(self.MonthlyDropDown.get())

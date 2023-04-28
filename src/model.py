@@ -13,8 +13,11 @@ class Model:
         self.c = controller
 
     def FindStartMonth(self):
-        earliest = self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX].min()
-        self.c.CurrentViewingMonth.set(pd.to_datetime(earliest).strftime("%B %Y"))
+        try:
+            earliest = self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX].min()
+            self.c.CurrentViewingMonth.set(pd.to_datetime(earliest).strftime("%B %Y"))
+        except:
+            self.c.CurrentViewingMonth.set("No Transactions Available")
 
     def FindStatements(self):
         files = [f for f in listdir(CUSTOM_DATA_DIR) if isfile(join(CUSTOM_DATA_DIR, f))]
@@ -55,31 +58,59 @@ class Model:
         return False
     
     def getPercentages(self, transactions):
+        if transactions.empty:
+            return {}
         groups = transactions.groupby(CATEGORY_INDEX)
         CurrentData = {}
         for name, group in groups:
             sum = group[PAYMENT_INDEX].sum()
             CurrentData[name] = sum
-        return CurrentData
+        for cat in self.c.TotalCategories:
+            if not cat in CurrentData:
+                CurrentData[cat] = 0
+        ordered = {}
+        for cat in self.c.TotalCategories:
+            ordered[cat] = CurrentData[cat]
+        return ordered
     
     def getTransactionsWithinRange(self):
+        if self.c.TotalTransactionsDF.empty:
+            return self.c.TotalTransactionsDF
         dt = datetime.strptime(self.c.CurrentViewingMonth.get(), '%B %Y')
         monthrange = ((pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.month == dt.month) & (pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.year == dt.year))
         return self.c.TotalTransactionsDF[monthrange]
     
     def getMonthGroups(self):
+        if self.c.TotalTransactionsDF.empty:
+            return self.c.TotalTransactionsDF
         return self.c.TotalTransactionsDF.groupby([pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.month, pd.to_datetime(self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX]).dt.year])
 
     def getAvailableMonths(self):
+        if self.c.TotalTransactionsDF.empty:
+            return [""]
         months = []
         groups = self.getMonthGroups()
         for name, group in groups:
             months.append(datetime.strptime(str(name), "(%m, %Y)").strftime("%B %Y"))
-        return months
+        return sorted(months, key=lambda x: self.StringToDatetime(x))
     
     def getTotalSpending(self):
+        if self.c.TotalTransactionsDF.empty:
+            return {}
         monthlyspending = {}
         groups = self.getMonthGroups()
         for name, group in groups:
-            monthlyspending[datetime.strptime(str(name), "(%m, %Y)").strftime("%B %Y")] = group[PAYMENT_INDEX].sum()
-        return monthlyspending
+            monthlyspending[datetime.strptime(str(name), "(%m, %Y)").strftime("%B %y")] = group[PAYMENT_INDEX].sum()
+        return dict(sorted(monthlyspending.items(), key=lambda x: self.StringToDatetime(x[0], False)))
+
+    def StringToDatetime(self, string, bigyear=True):
+        if bigyear:
+            return datetime.strptime(string, '%B %Y')
+        return datetime.strptime(string, '%B %y')
+    
+    def getAllCategories(self):
+        cats = []
+        groups = self.c.TotalTransactionsDF.groupby(CATEGORY_INDEX)
+        for name, group in groups:
+            cats.append(name)
+        return cats
