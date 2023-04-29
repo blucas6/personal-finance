@@ -20,7 +20,7 @@ class Model:
             self.c.CurrentViewingMonth.set("No Transactions Available")
 
     def FindStatements(self):
-        files = [f for f in listdir(CUSTOM_DATA_DIR) if isfile(join(CUSTOM_DATA_DIR, f))]
+        files = [f for f in listdir(STATEMENT_DIR) if isfile(join(STATEMENT_DIR, f))]
         return files
     
     def CleanDates(self, df):
@@ -51,10 +51,8 @@ class Model:
         return merged_dfs
 
     def isFileExtCSV(self, f):
-        for c in range(len(f)):
-            if f[c] == '.':
-                if f[c+1] == 'c' and f[c+2] == 's' and f[c+3] == 'v' and c+4 > len(f)-1:
-                    return True
+        if f[-1] == 'v' and f[-2] == 's' and f[-3] == 'c' and f[-4] == '.':
+            return True
         return False
     
     def getPercentages(self, transactions):
@@ -110,6 +108,8 @@ class Model:
     
     def getAllCategories(self):
         cats = []
+        if self.c.TotalTransactionsDF.empty:
+            return []
         groups = self.c.TotalTransactionsDF.groupby(CATEGORY_INDEX)
         for name, group in groups:
             cats.append(name)

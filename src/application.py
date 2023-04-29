@@ -18,6 +18,7 @@ class Application:
 
         ################ ICONS ######################################
         self.AddFileIcon = ImageTk.PhotoImage(Image.open("../icons/open_file.png").resize((23,23)))
+        self.DeleteAllFiles = ImageTk.PhotoImage(Image.open("../icons/delete_file.png").resize((23,23)))
         #############################################################
 
         ################ MENU BAR ####################################
@@ -35,6 +36,8 @@ class Application:
         self.ToolBarArea.grid(row=0, column=0, columnspan=3, sticky='w')
         self.AddFileButton = tk.Button(self.ToolBarArea, image=self.AddFileIcon, command=lambda:self.c.ImportData())
         self.AddFileButton.grid(row=0, column=0)
+        self.DeleteAllFilesButton = tk.Button(self.ToolBarArea, image=self.DeleteAllFiles, command=lambda:self.c.DeleteAllImportedFiles())
+        self.DeleteAllFilesButton.grid(row=0, column=1)
         ##############################################################
 
         ############### VIEW FILES COLUMN ############################
@@ -107,7 +110,10 @@ class Application:
 
     def RefreshTotalSpending(self):
         CurrentData = self.c.FindTotalSpending()
-        currentmonth = datetime.strptime(self.c.CurrentViewingMonth.get(), '%B %Y').strftime('%B %y')
+        try:
+            currentmonth = datetime.strptime(self.c.CurrentViewingMonth.get(), '%B %Y').strftime('%B %y')
+        except:
+            currentmonth = 'No Transactions Available'
         colors = []
         for key in CurrentData.keys():
             if currentmonth == key:
@@ -132,3 +138,4 @@ class Application:
     def DropDownEvent(self, e):
         self.c.ChangeView(self.MonthlyDropDown.get())
         self.RefreshTotalSpending()
+        

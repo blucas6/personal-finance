@@ -1,14 +1,11 @@
 from config import *
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import tkinter as tk
 import shutil
-from os import listdir
-from os.path import isfile, join
+import os
 from application import Application
-import csv
 from model import Model
 import pandas as pd
-from datetime import datetime
 
 class Controller:
     def __init__(self):
@@ -45,11 +42,17 @@ class Controller:
         self.VIEW.listBoxString.set(lst)
 
     def ImportData(self):
-        filename = filedialog.askopenfilename(initialdir = "/", title = "Select a File", filetypes = (("CSV Files", "*.csv"), ("all files","*.*")))
-        if self.MODEL.isFileExtCSV(filename):
-            shutil.copy(filename, STATEMENT_DIR)
-            shutil.copy(filename, CUSTOM_DATA_DIR)
-            self.StartUp()
+        filename = filedialog.askopenfilenames(initialdir = "/", title = "Select a File", filetypes = (("CSV Files", "*.csv"), ("all files","*.*")))
+        for f in filename:
+            if self.MODEL.isFileExtCSV(f):
+                try:
+                    shutil.copy(f, STATEMENT_DIR)
+                    shutil.copy(f, CUSTOM_DATA_DIR)
+                    self.StartUp()
+                except:
+                    messagebox.showerror(title="Import Error", message="Failed to import file: %s"%f)
+            else:
+                messagebox.showerror(title="File Type Error", message="File is not a .csv!")
 
     def LoadInDataTransactions(self):
         self.TotalTransactionsDF = self.MODEL.ReadData()
@@ -78,3 +81,18 @@ class Controller:
 
     def FindAllCategories(self):
         self.MODEL.getAllCategories()
+
+    def DeleteAllImportedFiles(self):
+        paths = []
+        for f in os.listdir(STATEMENT_DIR):
+            paths.append(os.path.join(STATEMENT_DIR, f))
+        for f in os.listdir(CUSTOM_DATA_DIR):
+            paths.append(os.path.join(CUSTOM_DATA_DIR, f))
+        for path in paths:
+            try:
+                if os.path.isfile(path):
+                    os.remove(path)
+            except Exception as e:
+                print(f"Error deleting {path}: {e}")
+        self.genListBox()
+        self.StartUp()
