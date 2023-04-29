@@ -33,7 +33,6 @@ class Controller:
     def StartUp(self):
         self.LoadInDataTransactions()
         self.TotalCategories = self.MODEL.getAllCategories()
-        # print(self.TotalTransactionsDF)
         self.MODEL.FindStartMonth()
         self.VIEW.setup()
 
@@ -93,6 +92,6 @@ class Controller:
                 if os.path.isfile(path):
                     os.remove(path)
             except Exception as e:
-                print(f"Error deleting {path}: {e}")
+                messagebox.showerror(title="Deletion Error", message=f"Error deleting {path}: {e}")
         self.genListBox()
         self.StartUp()

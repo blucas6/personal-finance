@@ -93,9 +93,7 @@ class PieChart:
                 cleandata[headers[i]] = d
         if othercat > 0:
             cleandata[self.title_of_small_categories] = othercat
-        print(cleandata)
         sorted_dict = dict(sorted(cleandata.items(), key=lambda x: x[1]))
-        print(sorted_dict)
         result = {}
         for i in range(len(sorted_dict)):
             result[list(sorted_dict.items())[-i-1][0]] = list(sorted_dict.items())[-i-1][1]
@@ -103,7 +101,6 @@ class PieChart:
         if len(sorted_dict) %2 == 1:
             middle = list(sorted_dict.keys())[len(sorted_dict)-1]
             result[middle] = sorted_dict[middle]
-        print(result)
         return result
 
 class DataTable:
@@ -120,7 +117,7 @@ class DataTable:
         else:
             self.table["columns"] = ("col1", "col2")
             self.table["show"] = 'headings'
-            self.table.column("#0", width=10000)
+            self.table.column("#0", width=800)
 
     def drawTree(self, headers, data):
         if data:
@@ -148,7 +145,6 @@ class DataTable:
         for r in data:
             try:
                 if len(r[index]) > length:
-                    # print(len(r[index]), r[index])
                     length = len(r[index])
             except TypeError:
                 if len(str(r[index])) > length:
