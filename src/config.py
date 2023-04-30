@@ -13,9 +13,17 @@ WIN_HEIGHT = 900
 STATEMENT_DIR = "../raw"
 CUSTOM_DATA_DIR = "../data"
 
+# PARAMETER FILE
+PARAMETER_FILE = "parameters.ini"
+
 
 # DATA TABLE
 CATEGORY_INDEX = 'Category'      # column that category is stored in
 PAYMENT_INDEX = 'Debit'         # column that price is stored in
 TRANSACTIONDATE_INDEX = 'Transaction Date'
 DATEPOSTED_INDEX = 'Posted Date'
+
+# ICONS
+ICON_FOLDER = "../icons"
+ICON_SIZE = (32,32)
+ICON_SIZE_SMALL = (16, 16)

@@ -12,6 +12,9 @@ def Clean():
         os.makedirs(CUSTOM_DATA_DIR)
     if not os.path.exists(STATEMENT_DIR):
         os.makedirs(STATEMENT_DIR)
+    if not os.path.exists(PARAMETER_FILE):
+        fo = open(PARAMETER_FILE, "w+")
+        fo.close()
 
 
 ##############################################################

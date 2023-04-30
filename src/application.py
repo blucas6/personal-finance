@@ -16,9 +16,16 @@ class Application:
     def __init__(self, root, controller):
         self.c = controller
 
+        self.AccountFileStrings = []    # list of stringvars
+
         ################ ICONS ######################################
-        self.AddFileIcon = ImageTk.PhotoImage(Image.open("../icons/open_file.png").resize((23,23)))
-        self.DeleteAllFiles = ImageTk.PhotoImage(Image.open("../icons/delete_file.png").resize((23,23)))
+        self.AddFiles_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/open_file.png").resize(ICON_SIZE))
+        self.DeleteAllFiles_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/delete_file.png").resize(ICON_SIZE))
+        self.DeleteFile_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/delete_file.png").resize(ICON_SIZE_SMALL))
+        self.AddFile_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/open_file.png").resize(ICON_SIZE_SMALL))
+        self.AddCard_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/add_card.png").resize(ICON_SIZE))
+        self.DeleteAccount_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/delete_account.png").resize(ICON_SIZE_SMALL))
+
         #############################################################
 
         ################ MENU BAR ####################################
@@ -34,19 +41,20 @@ class Application:
         ############## TOOL BAR ######################################
         self.ToolBarArea = tk.Frame(root)
         self.ToolBarArea.grid(row=0, column=0, columnspan=3, sticky='w')
-        self.AddFileButton = tk.Button(self.ToolBarArea, image=self.AddFileIcon, command=lambda:self.c.ImportData())
-        self.AddFileButton.grid(row=0, column=0)
-        self.DeleteAllFilesButton = tk.Button(self.ToolBarArea, image=self.DeleteAllFiles, command=lambda:self.c.DeleteAllImportedFiles())
-        self.DeleteAllFilesButton.grid(row=0, column=1)
+
+        self.AddCardButton = tk.Button(self.ToolBarArea, image=self.AddCard_Icon, command=lambda:self.c.AddNewCard())
+        self.AddCardButton.grid(row=0, column=0)
+        self.DeleteAllFilesButton = tk.Button(self.ToolBarArea, image=self.DeleteAllFiles_Icon, command=lambda:self.c.DeleteAllImportedFiles())
+        self.DeleteAllFilesButton.grid(row=0, column=2)
         ##############################################################
 
         ############### VIEW FILES COLUMN ############################
         self.LeftSideArea = tk.Frame(root)
         self.LeftSideArea.grid(row=1, column=0, rowspan=10, sticky='n', padx=5, pady=5)
-        tk.Label(self.LeftSideArea, text="Transaction Files", font=MEDIUM_FONT).grid(row=0,column=0, sticky='n')
-        self.listBoxString = tk.StringVar(value=[''])
-        self.listBox = tk.Listbox(self.LeftSideArea, listvariable=self.listBoxString, width=35)
-        self.listBox.grid(row=1, column=0, sticky='n')
+
+        tk.Label(self.LeftSideArea, text="Accounts", font=MEDIUM_FONT).grid(row=0, column=0, sticky='n')
+        self.AccountsSubFrame = tk.Frame(self.LeftSideArea, relief='solid', borderwidth=2)
+        self.AccountsSubFrame.grid(row=1, column=0, sticky='n')
         ##############################################################
 
         ############## TRANSACTION MAIN COLUMN #############################
@@ -87,15 +95,13 @@ class Application:
         self.MonthlySpendingLabel = tk.Label(self.RightSideArea, textvariable=self.MonthlySpending_var, font=SMALL_FONT)
         self.MonthlySpendingLabel.grid(row=3, column=0)
 
-
-        
         #####################################################################
     
     def setup(self):
-        self.c.genListBox()
         self.RefreshMonthlyGraphs()
         self.RefreshMonthDropdown()
         self.RefreshTotalSpending()
+        self.RefreshAccountListDisplay()
 
     def RefreshMonthlyGraphs(self):
         transactions = self.c.getTransactionsWithinRange()
@@ -138,4 +144,24 @@ class Application:
     def DropDownEvent(self, e):
         self.c.ChangeView(self.MonthlyDropDown.get())
         self.RefreshTotalSpending()
+
+    def RefreshAccountListDisplay(self):
+        for w in self.AccountsSubFrame.winfo_children():
+            w.destroy()
+        rw = 0
+        self.AccountFileStrings = []
+        for ind, account in enumerate(self.c.AccountsList.keys()):
+            tk.Label(self.AccountsSubFrame, text=account, font=SMALL_FONT).grid(row=rw, column=0)
+            tk.Button(self.AccountsSubFrame, image=self.AddFile_Icon, command=lambda account=account:self.c.ImportData(account)).grid(row=rw, column=1)
+            tk.Button(self.AccountsSubFrame, image=self.DeleteFile_Icon, command=lambda account=account:self.c.DeleteCardFiles(account)).grid(row=rw, column=2)
+            tk.Button(self.AccountsSubFrame, image=self.DeleteAccount_Icon, command=lambda account=account:self.c.DeleteAccount(account)).grid(row=rw, column=3)
+
+            files = self.c.AccountsList[account]
+            if files:
+                self.AccountFileStrings.append(tk.StringVar(value=files))
+                tk.Listbox(self.AccountsSubFrame, listvariable=self.AccountFileStrings[ind], width=35).grid(row=rw+1, column=0)
+            else:
+                self.AccountFileStrings.append(tk.StringVar(value=['No Files']))
+                tk.Listbox(self.AccountsSubFrame, listvariable=self.AccountFileStrings[ind], width=35, height=1).grid(row=rw+1, column=0)
+            rw += 2
         

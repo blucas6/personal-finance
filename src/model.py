@@ -7,6 +7,7 @@ from application import Application
 import csv
 import pandas as pd
 from datetime import datetime
+import configparser
 
 class Model:
     def __init__(self, controller):
@@ -36,18 +37,7 @@ class Model:
             for f in files:
                 list_of_dfs.append(pd.read_csv(CUSTOM_DATA_DIR+"/"+f))
             merged_dfs = pd.concat(list_of_dfs, ignore_index=True)
-            # merged_dfs = self.CleanDates(merged_dfs)
             merged_dfs = merged_dfs.iloc[::-1].reset_index(drop=True)
-            # DELETE LATER #
-            for f in files:
-                with open(CUSTOM_DATA_DIR+"/"+f, newline='') as csvfile:
-                    datareader = csv.reader(csvfile, delimiter=',')
-                    for i,row in enumerate(datareader):
-                        if i == 0:
-                            self.c.transaction_header = row
-                        else:
-                            self.c.all_transactions.append(row)
-            ###########################
         return merged_dfs
 
     def isFileExtCSV(self, f):
@@ -114,3 +104,23 @@ class Model:
         for name, group in groups:
             cats.append(name)
         return cats
+    
+    def ReadFileFindColumns(self, file):
+        return pd.read_csv(file).columns
+    
+    def AddSectionorValueToConfig(self, section, param="", value=""):
+        if param:
+            self.c.Parameters.set(section, param, value)
+        else:
+            self.c.Parameters.add_section(section)
+        self.WriteToConfig()
+
+    def WriteToConfig(self):
+        with open(PARAMETER_FILE, 'w') as pfile:
+            self.c.Parameters.write(pfile)
+
+    def RemoveSectionFromConfig(self, section):
+        if self.c.Parameters.has_section(section):
+            self.c.Parameters.remove_section(section)
+            self.WriteToConfig()
+
