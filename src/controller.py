@@ -8,6 +8,7 @@ from model import Model
 import pandas as pd
 from optionwindow import OptionWindow
 import configparser
+from collections import defaultdict
 
 class Controller:
     def __init__(self):
@@ -20,7 +21,7 @@ class Controller:
         self.Parameters = configparser.ConfigParser()
         self.TotalTransactionsDF = pd.DataFrame()
         self.TotalCategories = []
-        self.AccountsList = {}
+        self.AccountsList = defaultdict(list)
         ##############################################################
         ################### VIEWING VARIABLES ########################
         self.CurrentViewingMonth = tk.StringVar(value="")
@@ -35,20 +36,21 @@ class Controller:
     def ReadFromConfig(self):
         self.Parameters.read(PARAMETER_FILE)
         for section in self.Parameters.sections():
-            self.AccountsList[section] = ""
-        for op_name, op_val in self.Parameters.items():
-            print(op_name, op_val)
+            for key, value in self.Parameters.items(section):
+                print("Parameters:", section, key, value)
+                if key == "files":
+                    self.AccountsList[section] = value.split(",")
 
     def StartUp(self):
         self.ReadFromConfig()
-        self.LoadInDataTransactions()
+        self.TotalTransactionsDF = self.MODEL.ReadData()
         self.TotalCategories = self.MODEL.getAllCategories()
         self.MODEL.FindStartMonth()
         self.VIEW.setup()
 
     def ImportData(self, account):
-        filename = filedialog.askopenfilenames(initialdir = "/Downloads", title = "Select a File", filetypes = (("CSV Files", "*.csv"), ("all files","*.*")))
-        for f in filename:
+        filenames = list(filedialog.askopenfilenames(initialdir = "/Downloads", title = "Select a File", filetypes = (("CSV Files", "*.csv"), ("all files","*.*"))))
+        for f in filenames:
             # cols = self.MODEL.ReadFileFindColumns(f)
             # OptionWindow(self.root, f, cols, cardname, 'Category', "Select which column dictates the Categories column. This is where your transactions are categorized by the types of purchases.")
             # OptionWindow(self.root, f, cols, cardname, 'Price', "Select which column dictates the Price column. This is the amount you paid for the transaction.")
@@ -59,16 +61,16 @@ class Controller:
                 try:
                     shutil.copy(f, STATEMENT_DIR)
                     shutil.copy(f, CUSTOM_DATA_DIR)
-                    self.AccountsList[account].append(filename)
-                    self.MODEL.AddSectionorValueToConfig(account, 'Files', filename)
-                    self.StartUp()
                 except:
                     messagebox.showerror(title="Import Error", message="Failed to import file: %s"%f)
+                if self.AccountsList[account]:
+                    self.AccountsList[account].append(f)
+                else:
+                    self.AccountsList[account] = [f]
             else:
                 messagebox.showerror(title="File Type Error", message="File is not a .csv!")
-
-    def LoadInDataTransactions(self):
-        self.TotalTransactionsDF = self.MODEL.ReadData()
+        self.MODEL.AddSectionorValueToConfig(account, 'Files', self.AccountsList[account])
+        self.StartUp()
 
     def getPercentages(self, transactions):
         return self.MODEL.getPercentages(transactions)
@@ -95,19 +97,21 @@ class Controller:
     def FindAllCategories(self):
         self.MODEL.getAllCategories()
 
-    def DeleteAllImportedFiles(self):
-        paths = []
-        for f in os.listdir(STATEMENT_DIR):
-            paths.append(os.path.join(STATEMENT_DIR, f))
-        for f in os.listdir(CUSTOM_DATA_DIR):
-            paths.append(os.path.join(CUSTOM_DATA_DIR, f))
+    def DeleteCardFiles(self, account):
+        files = self.AccountsList[account]
+        for f in files:
+            paths = []
+            for f in os.listdir(STATEMENT_DIR):
+                paths.append(os.path.join(STATEMENT_DIR, f))
+            for f in os.listdir(CUSTOM_DATA_DIR):
+                paths.append(os.path.join(CUSTOM_DATA_DIR, f))
         for path in paths:
             try:
                 if os.path.isfile(path):
                     os.remove(path)
             except Exception as e:
                 messagebox.showerror(title="Deletion Error", message=f"Error deleting {path}: {e}")
-        self.genListBox()
+        self.MODEL.AddSectionorValueToConfig(account, "files")
         self.StartUp()
 
     def AddNewCard(self):
@@ -119,6 +123,7 @@ class Controller:
 
     def DeleteAccount(self, account):
         print(f"Deleting {account}")
+        self.DeleteCardFiles(account)
         del self.AccountsList[account]
-        self.VIEW.RefreshAccountListDisplay()
         self.MODEL.RemoveSectionFromConfig(account)
+        self.StartUp()

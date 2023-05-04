@@ -115,17 +115,24 @@ class DataTable:
             self.createHeaders(headers, data)
             self.addData(data)
         else:
-            self.table["columns"] = ("col1", "col2")
-            self.table["show"] = 'headings'
-            self.table.column("#0", width=800)
+            self.drawDefault()
 
     def drawTree(self, headers, data):
+        self.table.destroy()
         if data:
-            self.table.destroy()
             self.table = ttk.Treeview(self.window, height=20)
             self.table.grid(row=self.st_row, column=self.st_col)
             self.createHeaders(headers, data)
             self.addData(data)
+        else:
+            self.table = ttk.Treeview(self.window, height=20)
+            self.table.grid(row=self.st_row, column=self.st_col)
+            self.drawDefault()
+
+    def drawDefault(self):
+        self.table["columns"] = ("col1", "col2")
+        self.table["show"] = 'headings'
+        self.table.column("#0", width=800)
 
     def createHeaders(self, headers, data):
         self.table["columns"] = headers

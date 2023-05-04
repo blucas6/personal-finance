@@ -44,8 +44,6 @@ class Application:
 
         self.AddCardButton = tk.Button(self.ToolBarArea, image=self.AddCard_Icon, command=lambda:self.c.AddNewCard())
         self.AddCardButton.grid(row=0, column=0)
-        self.DeleteAllFilesButton = tk.Button(self.ToolBarArea, image=self.DeleteAllFiles_Icon, command=lambda:self.c.DeleteAllImportedFiles())
-        self.DeleteAllFilesButton.grid(row=0, column=2)
         ##############################################################
 
         ############### VIEW FILES COLUMN ############################
@@ -150,18 +148,21 @@ class Application:
             w.destroy()
         rw = 0
         self.AccountFileStrings = []
-        for ind, account in enumerate(self.c.AccountsList.keys()):
-            tk.Label(self.AccountsSubFrame, text=account, font=SMALL_FONT).grid(row=rw, column=0)
-            tk.Button(self.AccountsSubFrame, image=self.AddFile_Icon, command=lambda account=account:self.c.ImportData(account)).grid(row=rw, column=1)
-            tk.Button(self.AccountsSubFrame, image=self.DeleteFile_Icon, command=lambda account=account:self.c.DeleteCardFiles(account)).grid(row=rw, column=2)
-            tk.Button(self.AccountsSubFrame, image=self.DeleteAccount_Icon, command=lambda account=account:self.c.DeleteAccount(account)).grid(row=rw, column=3)
+        if bool(self.c.AccountsList.keys()):
+            for ind, account in enumerate(self.c.AccountsList.keys()):
+                tk.Label(self.AccountsSubFrame, text=account, font=SMALL_FONT).grid(row=rw, column=0)
+                tk.Button(self.AccountsSubFrame, image=self.AddFile_Icon, command=lambda account=account:self.c.ImportData(account)).grid(row=rw, column=1)
+                tk.Button(self.AccountsSubFrame, image=self.DeleteFile_Icon, command=lambda account=account:self.c.DeleteCardFiles(account)).grid(row=rw, column=2)
+                tk.Button(self.AccountsSubFrame, image=self.DeleteAccount_Icon, command=lambda account=account:self.c.DeleteAccount(account)).grid(row=rw, column=3)
 
-            files = self.c.AccountsList[account]
-            if files:
-                self.AccountFileStrings.append(tk.StringVar(value=files))
-                tk.Listbox(self.AccountsSubFrame, listvariable=self.AccountFileStrings[ind], width=35).grid(row=rw+1, column=0)
-            else:
-                self.AccountFileStrings.append(tk.StringVar(value=['No Files']))
-                tk.Listbox(self.AccountsSubFrame, listvariable=self.AccountFileStrings[ind], width=35, height=1).grid(row=rw+1, column=0)
-            rw += 2
-        
+                files = self.c.AccountsList[account]
+                print(self.c.AccountsList[account])
+                if files:
+                    self.AccountFileStrings.append(tk.StringVar(value=files))
+                    tk.Listbox(self.AccountsSubFrame, listvariable=self.AccountFileStrings[ind], width=35, height=len(files)).grid(row=rw+1, column=0)
+                else:
+                    self.AccountFileStrings.append(tk.StringVar(value=['No Files']))
+                    tk.Listbox(self.AccountsSubFrame, listvariable=self.AccountFileStrings[ind], width=35, height=1).grid(row=rw+1, column=0)
+                rw += 2
+        else:
+            tk.Label(self.AccountsSubFrame, text="No Accounts Added", font=SMALL_FONT).grid(row=rw, column=0)

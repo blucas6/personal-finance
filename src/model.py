@@ -109,10 +109,20 @@ class Model:
         return pd.read_csv(file).columns
     
     def AddSectionorValueToConfig(self, section, param="", value=""):
-        if param:
-            self.c.Parameters.set(section, param, value)
-        else:
+        if not self.c.Parameters.has_section(section):
             self.c.Parameters.add_section(section)
+        if param:
+            if value:
+                if isinstance(value, list):
+                    if len(value) == 1:
+                        val = str(value[0])
+                    else:
+                        val = ','.join(value)
+                else:
+                    val = value
+                self.c.Parameters.set(section, param, val)
+            else:
+                self.c.Parameters.set(section, param, "")
         self.WriteToConfig()
 
     def WriteToConfig(self):
