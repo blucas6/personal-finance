@@ -114,10 +114,13 @@ class Model:
         if param:
             if value:
                 if isinstance(value, list):
+                    value = [x for x in value if x]
                     if len(value) == 1:
-                        val = str(value[0])
+                        val = value[0]
                     else:
-                        val = ','.join(value)
+                        val = ",".join(value)
+                elif isinstance(value, bool):
+                    val = str(value)
                 else:
                     val = value
                 self.c.Parameters.set(section, param, val)

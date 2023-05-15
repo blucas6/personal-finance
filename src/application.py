@@ -19,12 +19,12 @@ class Application:
         self.AccountFileStrings = []    # list of stringvars
 
         ################ ICONS ######################################
-        self.AddFiles_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/open_file.png").resize(ICON_SIZE))
-        self.DeleteAllFiles_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/delete_file.png").resize(ICON_SIZE))
-        self.DeleteFile_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/delete_file.png").resize(ICON_SIZE_SMALL))
-        self.AddFile_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/open_file.png").resize(ICON_SIZE_SMALL))
-        self.AddCard_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/add_card.png").resize(ICON_SIZE))
-        self.DeleteAccount_Icon = ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/delete_account.png").resize(ICON_SIZE_SMALL))
+        self.AddFiles_Icon = self.ImportIcon("open_file.png", ICON_SIZE)
+        self.DeleteAllFiles_Icon = self.ImportIcon("delete_file.png", ICON_SIZE)
+        self.DeleteFile_Icon = self.ImportIcon("delete_file.png", ICON_SIZE_SMALL)
+        self.AddFile_Icon = self.ImportIcon("open_file.png", ICON_SIZE_SMALL)
+        self.AddCard_Icon = self.ImportIcon("add_card.png", ICON_SIZE)
+        self.DeleteAccount_Icon = self.ImportIcon("delete_account.png", ICON_SIZE_SMALL)
 
         #############################################################
 
@@ -148,15 +148,15 @@ class Application:
             w.destroy()
         rw = 0
         self.AccountFileStrings = []
-        if bool(self.c.AccountsList.keys()):
-            for ind, account in enumerate(self.c.AccountsList.keys()):
+        if bool(self.c.AccountsFileList.keys()):
+            for ind, account in enumerate(self.c.AccountsFileList.keys()):
                 tk.Label(self.AccountsSubFrame, text=account, font=SMALL_FONT).grid(row=rw, column=0)
                 tk.Button(self.AccountsSubFrame, image=self.AddFile_Icon, command=lambda account=account:self.c.ImportData(account)).grid(row=rw, column=1)
                 tk.Button(self.AccountsSubFrame, image=self.DeleteFile_Icon, command=lambda account=account:self.c.DeleteCardFiles(account)).grid(row=rw, column=2)
                 tk.Button(self.AccountsSubFrame, image=self.DeleteAccount_Icon, command=lambda account=account:self.c.DeleteAccount(account)).grid(row=rw, column=3)
 
-                files = self.c.AccountsList[account]
-                print(self.c.AccountsList[account])
+                files = self.c.AccountsFileList[account]
+                print(self.c.AccountsFileList[account])
                 if files:
                     self.AccountFileStrings.append(tk.StringVar(value=files))
                     tk.Listbox(self.AccountsSubFrame, listvariable=self.AccountFileStrings[ind], width=35, height=len(files)).grid(row=rw+1, column=0)
@@ -166,3 +166,6 @@ class Application:
                 rw += 2
         else:
             tk.Label(self.AccountsSubFrame, text="No Accounts Added", font=SMALL_FONT).grid(row=rw, column=0)
+
+    def ImportIcon(self, filename, size):
+        return ImageTk.PhotoImage(Image.open(ICON_FOLDER+"/"+filename).convert(mode="RGBA").resize(size))

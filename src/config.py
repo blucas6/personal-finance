@@ -2,6 +2,7 @@
 LARGE_FONT= ("Verdana", 20)
 MEDIUM_FONT = ("Verdana", 14)
 SMALL_FONT = ("Verdana", 10)
+ITALIC_FONT = ("TkDefaultFont", 12, "italic")
 
 
 # WINDOW

@@ -132,7 +132,7 @@ class DataTable:
     def drawDefault(self):
         self.table["columns"] = ("col1", "col2")
         self.table["show"] = 'headings'
-        self.table.column("#0", width=800)
+        self.table.column("#1", width=550)
 
     def createHeaders(self, headers, data):
         self.table["columns"] = headers
