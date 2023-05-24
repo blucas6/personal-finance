@@ -17,31 +17,81 @@ class Model:
         try:
             earliest = self.c.TotalTransactionsDF[TRANSACTIONDATE_INDEX].min()
             self.c.CurrentViewingMonth.set(pd.to_datetime(earliest).strftime("%B %Y"))
-        except:
+        except Exception as e:
+            print("Couldn't find start month:", e)
             self.c.CurrentViewingMonth.set("No Transactions Available")
-
-    def FindStatements(self):
-        files = [f for f in listdir(STATEMENT_DIR) if isfile(join(STATEMENT_DIR, f))]
-        return files
     
     def CleanDates(self, df):
         df[TRANSACTIONDATE_INDEX] = pd.to_datetime(df[TRANSACTIONDATE_INDEX])
-        df[DATEPOSTED_INDEX] = pd.to_datetime(df[DATEPOSTED_INDEX])
         return df
+    
+    def UndoNegatives(self, value):
+        if value < 0:
+            return value*-1
+        return value
+        
+    def CheckSetup(self, file, account):
+        ex = pd.read_csv(file)
+        for name in DT_COLUMN_NAMES:
+            if not self.c.Parameters[account][name] in ex.columns:
+                return False
+        return True 
+    
+    def CreateCleanTable(self, rawdt, account):
+        columnswewant = []
+        rename = []
+        columnsnotincluded = []
+        # loop through all column names for the datatable display
+        for cww in DT_COLUMN_NAMES:
+            # if found a matching setting, append that column to the clean data
+            if cww in self.c.Parameters[account]:
+                columnswewant.append(self.c.Parameters[account][cww])
+                rename.append(cww)
+            # if not found, add empty column later
+            else:
+                columnsnotincluded.append(cww)
+        print("COLUMNS WE WANT:",columnswewant)
+        # copy whatever data was setup
+        cleandt = rawdt[columnswewant].copy()
+        # add in empty columns for data not setup
+        for cni in columnsnotincluded:
+            cleandt[cni] = " "
+        # rename columns to the appropriate names IN ORDER 
+        rename = rename + columnsnotincluded
+        cleandt.columns = rename
+        if self.c.Parameters[account][COMBINED_PARAMETER]:
+            # separate the values by positivity
+            cleandt[INCOME_INDEX] = cleandt[PAYMENT_INDEX][cleandt[PAYMENT_INDEX] > 0]
+            cleandt[PAYMENT_INDEX] = cleandt[PAYMENT_INDEX].apply(self.UndoNegatives)
+        print(cleandt)
+        return cleandt
     
     def ReadData(self):
         list_of_dfs = []
-        files = self.FindStatements()
-        merged_dfs = pd.DataFrame()
-        if files:
-            for f in files:
-                list_of_dfs.append(pd.read_csv(CUSTOM_DATA_DIR+"/"+f))
+        merged_dfs = pd.DataFrame() 
+        for account, flist in self.c.AccountsFileList.items():
+            for f in flist:
+                if f != "" and f != " " and self.c.Parameters[account][SETUP_PARAMETER]:
+                    filestring = CUSTOM_DATA_DIR+"/"+account+"/"+f
+                    print("FILE TO READ", filestring)
+                    try:
+                        singledf = pd.read_csv(filestring)
+                    except Exception as e:
+                        print("No file", filestring)
+                        print(e)
+                    else:
+                        cleandf = self.CreateCleanTable(singledf, account)
+                        list_of_dfs.append(cleandf)
+        if list_of_dfs:
             merged_dfs = pd.concat(list_of_dfs, ignore_index=True)
             merged_dfs = merged_dfs.iloc[::-1].reset_index(drop=True)
+            print(merged_dfs)
         return merged_dfs
 
     def isFileExtCSV(self, f):
         if f[-1] == 'v' and f[-2] == 's' and f[-3] == 'c' and f[-4] == '.':
+            return True
+        if f[-1] == 'V' and f[-2] == 'S' and f[-3] == 'C' and f[-4] == '.':
             return True
         return False
     
@@ -105,8 +155,9 @@ class Model:
             cats.append(name)
         return cats
     
-    def ReadFileFindColumns(self, file):
-        return pd.read_csv(file).columns
+    def ReadFileFindColumnsAndFirstRow(self, file):
+        df = pd.read_csv(file)
+        return df.columns, df.iloc[0].values.tolist()
     
     def AddSectionorValueToConfig(self, section, param="", value=""):
         if not self.c.Parameters.has_section(section):

@@ -25,6 +25,7 @@ class Application:
         self.AddFile_Icon = self.ImportIcon("open_file.png", ICON_SIZE_SMALL)
         self.AddCard_Icon = self.ImportIcon("add_card.png", ICON_SIZE)
         self.DeleteAccount_Icon = self.ImportIcon("delete_account.png", ICON_SIZE_SMALL)
+        self.DeleteAllData_Icon = self.ImportIcon("deletealldata.png", ICON_SIZE)
 
         #############################################################
 
@@ -44,6 +45,9 @@ class Application:
 
         self.AddCardButton = tk.Button(self.ToolBarArea, image=self.AddCard_Icon, command=lambda:self.c.AddNewCard())
         self.AddCardButton.grid(row=0, column=0)
+
+        self.DeleteAllDataButton = tk.Button(self.ToolBarArea, image=self.DeleteAllData_Icon, command=lambda:self.c.DeleteAllData())
+        self.DeleteAllDataButton.grid(row=0, column=1)
         ##############################################################
 
         ############### VIEW FILES COLUMN ############################
@@ -144,6 +148,7 @@ class Application:
         self.RefreshTotalSpending()
 
     def RefreshAccountListDisplay(self):
+        print("VIEWING: ", self.c.AccountsFileList)
         for w in self.AccountsSubFrame.winfo_children():
             w.destroy()
         rw = 0
