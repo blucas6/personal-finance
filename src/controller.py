@@ -34,6 +34,7 @@ class Controller:
         self.StartUp()
 
     def ReadFromConfig(self):
+        print("Reading ini!")
         self.Parameters.read(PARAMETER_FILE)
         for section in self.Parameters.sections():
             print("Section:", section)
@@ -78,8 +79,8 @@ class Controller:
                             self.AccountsFileList[account].append(fname)
                         else:
                             self.AccountsFileList[account] = [fname]
-                else:
-                    messagebox.showerror(title="File Format Error", message="File does not match configuration for this account!")
+                    else:
+                        messagebox.showerror(title="File Setup Error", message="File does not match previous setup!")
             else:
                 messagebox.showerror(title="File Type Error", message="File is not a .csv!")
         self.AddSectionorValueToConfig(account, 'Files', self.AccountsFileList[account])
@@ -157,12 +158,16 @@ class Controller:
         self.MODEL.AddSectionorValueToConfig(section=section, param=param, value=value)
 
     def DeleteAllData(self):
-        self.AccountsFileList = defaultdict(list)
+        print("***HARD RESET***")
+        self.AccountsFileList.clear()
+        self.Parameters = configparser.ConfigParser()
+        print(self.AccountsFileList)
         if os.path.exists(CUSTOM_DATA_DIR):
             shutil.rmtree(CUSTOM_DATA_DIR)
         if os.path.exists(STATEMENT_DIR):
             shutil.rmtree(STATEMENT_DIR)
         if os.path.exists(PARAMETER_FILE):
+            print("ini deleted!")
             os.remove(PARAMETER_FILE)
 
         if not os.path.exists(CUSTOM_DATA_DIR):

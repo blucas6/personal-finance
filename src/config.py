@@ -24,13 +24,14 @@ CATEGORY_INDEX = 'category'      # column that category is stored in
 PAYMENT_INDEX = 'payment'         # column that price is stored in
 TRANSACTIONDATE_INDEX = 'date'
 DESCRIPTION_INDEX = 'description'
-INCOME_INDEX = 'income'
+CREDIT_INDEX = 'credit'
 CARD_INDEX = 'card_number'
 COMBINED_PARAMETER = 'combined'
 SETUP_PARAMETER = 'setup'
+INCOME_PARAMETER = 'income'
 
-DT_COLUMN_NAMES = [CATEGORY_INDEX, PAYMENT_INDEX, TRANSACTIONDATE_INDEX, DESCRIPTION_INDEX, INCOME_INDEX, CARD_INDEX]
-DT_DISPLAY_NAMES = ['Category', 'Payment', 'Transaction Date', 'Description', 'Income', 'Card Number']
+DT_COLUMN_NAMES = [CARD_INDEX, TRANSACTIONDATE_INDEX, DESCRIPTION_INDEX, CATEGORY_INDEX, PAYMENT_INDEX, CREDIT_INDEX]   # represents the names for the config params
+DT_DISPLAY_NAMES = ['Category', 'Payment', 'Transaction Date', 'Description', 'Credit', 'Card Number']
 
 # ICONS
 ICON_FOLDER = "../icons"
