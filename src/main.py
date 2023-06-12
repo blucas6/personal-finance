@@ -8,8 +8,6 @@ from config import *
 
 
 def Clean():
-    if not os.path.exists(CUSTOM_DATA_DIR):
-        os.makedirs(CUSTOM_DATA_DIR)
     if not os.path.exists(STATEMENT_DIR):
         os.makedirs(STATEMENT_DIR)
     if not os.path.exists(PARAMETER_FILE):

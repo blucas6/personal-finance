@@ -83,7 +83,7 @@ class Model:
         for account, flist in self.c.AccountsFileList.items():
             for f in flist:
                 if f != "" and f != " " and self.c.Parameters[account][SETUP_PARAMETER]:
-                    filestring = CUSTOM_DATA_DIR+"/"+account+"/"+f
+                    filestring = STATEMENT_DIR+"/"+account+"/"+f
                     print("FILE TO READ", filestring)
                     try:
                         singledf = pd.read_csv(filestring)

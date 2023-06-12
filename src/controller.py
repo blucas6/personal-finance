@@ -68,10 +68,7 @@ class Controller:
                         try:
                             if not os.path.exists(STATEMENT_DIR+"/"+account):
                                 os.makedirs(STATEMENT_DIR + "/" + account)
-                            if not os.path.exists(CUSTOM_DATA_DIR+"/"+account):
-                                os.makedirs(CUSTOM_DATA_DIR + "/" + account)
                             shutil.copy(f, STATEMENT_DIR + "/" + account)
-                            shutil.copy(f, CUSTOM_DATA_DIR + "/" + account)
                         except:
                             messagebox.showerror(title="Import Error", message="Failed to import file: %s"%f)
                         fname = f.split("/").pop()
@@ -130,10 +127,6 @@ class Controller:
                 shutil.rmtree(STATEMENT_DIR+"/"+account)
             except Exception as e:
                 messagebox.showerror(title="Deletion Error", message=f"Error deleting {STATEMENT_DIR}/{account}: {e}")
-            try:
-                shutil.rmtree(CUSTOM_DATA_DIR+"/"+account)
-            except Exception as e:
-                messagebox.showerror(title="Deletion Error", message=f"Error deleting {CUSTOM_DATA_DIR}/{account}: {e}")
             self.AddSectionorValueToConfig(account, "files")
             self.StartUp()
         else:
@@ -162,16 +155,12 @@ class Controller:
         self.AccountsFileList.clear()
         self.Parameters = configparser.ConfigParser()
         print(self.AccountsFileList)
-        if os.path.exists(CUSTOM_DATA_DIR):
-            shutil.rmtree(CUSTOM_DATA_DIR)
         if os.path.exists(STATEMENT_DIR):
             shutil.rmtree(STATEMENT_DIR)
         if os.path.exists(PARAMETER_FILE):
             print("ini deleted!")
             os.remove(PARAMETER_FILE)
 
-        if not os.path.exists(CUSTOM_DATA_DIR):
-            os.makedirs(CUSTOM_DATA_DIR)
         if not os.path.exists(STATEMENT_DIR):
             os.makedirs(STATEMENT_DIR)
         if not os.path.exists(PARAMETER_FILE):
