@@ -43,10 +43,10 @@ class Application:
         self.ToolBarArea = tk.Frame(root)
         self.ToolBarArea.grid(row=0, column=0, columnspan=3, sticky='w')
 
-        self.AddCardButton = tk.Button(self.ToolBarArea, image=self.AddCard_Icon, command=lambda:self.c.AddNewCard())
+        self.AddCardButton = tk.Button(self.ToolBarArea, image=self.AddCard_Icon, text="Add Account", compound="top", command=lambda:self.c.AddNewCard())
         self.AddCardButton.grid(row=0, column=0)
 
-        self.DeleteAllDataButton = tk.Button(self.ToolBarArea, image=self.DeleteAllData_Icon, command=lambda:self.c.DeleteAllData())
+        self.DeleteAllDataButton = tk.Button(self.ToolBarArea, image=self.DeleteAllData_Icon, text="Clear Session", compound="top", command=lambda:self.c.DeleteAllData())
         self.DeleteAllDataButton.grid(row=0, column=1)
         ##############################################################
 
