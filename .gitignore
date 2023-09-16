@@ -1,2 +1,4 @@
 save/
 raw/
+__pycache__/
+data/
